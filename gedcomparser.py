@@ -3,7 +3,7 @@ from person import Person
 class gedcomParse():
     def __init__(self, file):
         self.fileContents = open(file).readlines()
-        self.peopleList = []
+        self.fullGedcom = []
 
         person = Person()
         current_index = 0
@@ -12,10 +12,20 @@ class gedcomParse():
             line = self.fileContents[current_index]
             if line.startswith("0"):
                 if "INDI" in line:
-                    self.peopleList.append(person)
+                    line_split = line.split("@")
+                    self.fullGedcom.append(person)
                     person = Person()
+                    person.id = line_split[1]
 
-            if line.startswith("1 NAME"):
+            if line.startswith("1 FAMC"):
+                line_split = line.split("@")
+                person.familyChild.append(line_split[1])
+
+            elif line.startswith("1 FAMS"):
+                line_split = line.split("@")
+                person.familySpouse.append(line_split[1])
+
+            elif line.startswith("1 NAME"):
                 person.name = self.remExtra(line)
 
             elif line.startswith("2 GIVN"):
