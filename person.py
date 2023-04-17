@@ -4,6 +4,7 @@ class Person:
         self.given = None
         self.surname = None
         self.sex = None
+        self.id = None
         self.birth = ()
         self.death = ()
         self.sources = []
@@ -13,3 +14,5 @@ class Person:
         self.residences = []
         self.titles = []
         self.links = []
+        self.familyChild = []
+        self.familySpouse = []
