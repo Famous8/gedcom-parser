@@ -1,31 +1,43 @@
-from person import Person
+from classes import Person, Family
 
 class gedcomParse():
     def __init__(self, file):
-        self.fileContents = open(file).readlines()
+        self.fileContents = open(file, encoding="utf8").readlines()
+
         self.fullGedcom = []
+        self.familyList = []
+
+        self.familyIDList = []
+        self.familyStart = None
 
         person = Person()
-        current_index = 0
 
-        while current_index < len(self.fileContents):
+        current_index = 0
+        indi = False
+
+        while self.familyStart is None:
             line = self.fileContents[current_index]
+
             if line.startswith("0"):
                 if "INDI" in line:
+                    indi = True
                     line_split = line.split("@")
-                    self.fullGedcom.append(person)
+
+                    if person.name != None:
+                        self.fullGedcom.append(person)
+
                     person = Person()
                     person.id = line_split[1]
 
             if line.startswith("1 FAMC"):
                 line_split = line.split("@")
-                person.familyChild.append(line_split[1])
+                person.familyChildID = line_split[1]
 
             elif line.startswith("1 FAMS"):
                 line_split = line.split("@")
-                person.familySpouse.append(line_split[1])
+                person.familySpouseIDs.append(line_split[1])
 
-            elif line.startswith("1 NAME"):
+            elif line.startswith("1 NAME") and indi:
                 person.name = self.remExtra(line)
 
             elif line.startswith("2 GIVN"):
@@ -164,7 +176,64 @@ class gedcomParse():
             elif line.startswith("2 NOTE"):
                 person.notes.append(self.remExtra(line))
 
+            if line.startswith("0 @F"):
+                self.familyStart = current_index
+
             current_index += 1
+
+        self.fullGedcom.append(person)
+        self.createFamilies()
+
+
+    def findPersonByID(self, id):
+        for person in self.fullGedcom:
+            if person.id == id:
+                return person
+
+        return None
+
+    def createFamilies(self):
+        family = Family()
+
+        for x in range(self.familyStart, len(self.fileContents)):
+            line = self.fileContents[x]
+            if line.startswith("0 @F"):
+                if family.id is not None:
+                    self.familyList.append(family)
+                    family = Family()
+                    family.id = line.split("@")[1]
+
+                family.id = line.split("@")[1]
+
+            if line.startswith("1 HUSB"):
+                person = self.findPersonByID(line.split("@")[1])
+                family.parentOne = person
+                person.familySpouses.append(family)
+                next = self.fileContents[x + 1]
+
+                if next.startswith("1 WIFE") or next.startswith("1 HUSB"):
+                    person = self.findPersonByID(next.split("@")[1])
+                    family.parentTwo = person
+                    person.familySpouses.append(family)
+
+            elif line.startswith("1 WIFE") and family.parentOne is None:
+                person = self.findPersonByID(line.split("@")[1])
+                family.parentOne = person
+                person.familySpouses.append(family)
+
+            elif line.startswith("1 CHIL"):
+                person = self.findPersonByID(line.split("@")[1])
+                family.children.append(person)
+                person.familyChild = family
+
+        self.familyList.append(family)
+
+    def findFamily(self, id):
+        for family in self.familyList:
+            if id == family.id:
+                return family
+
+        return None
 
     def remExtra(self, line):
         toRemove = ["\n", "/"]
@@ -173,3 +242,8 @@ class gedcomParse():
                 line = line.replace(char, "")
 
         return line[7:]
+
+if __name__ == '__main__':
+    fullGedcom = gedcomParse("D:\Genealogy\The Rizvi-Zaidi-Kazmi Family Tree.ged").fullGedcom
+    for person in fullGedcom:
+        print(vars(person))
