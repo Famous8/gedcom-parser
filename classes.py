@@ -4,7 +4,6 @@ class Person:
         self.given = None
         self.surname = None
         self.sex = None
-        self.id = None
         self.birth = ()
         self.death = ()
         self.sources = []
@@ -14,5 +13,17 @@ class Person:
         self.residences = []
         self.titles = []
         self.links = []
-        self.familyChild = []
-        self.familySpouse = []
+        self.id = None
+        self.familyChildID = None
+        self.familySpouseIDs = []
+        self.familyChild = None
+        self.familySpouses = []
+
+class Family:
+    def __init__(self):
+        self.id = None
+        self.members = []
+        self.parentOne = None
+        self.parentTwo = None
+        self.wife = None
+        self.children = []
