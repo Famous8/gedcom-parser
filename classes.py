@@ -4,10 +4,13 @@ class Person:
         self.given = None
         self.surname = None
         self.sex = None
-        self.birth = ()
-        self.death = ()
+        self.birth = []
+        self.death = []
         self.sources = []
         self.notes = []
+        self.events = []
+        self.facts = []
+        self.immigration = []
         self.occupations = []
         self.education = []
         self.residences = []
@@ -19,6 +22,7 @@ class Person:
         self.familyChild = None
         self.familySpouses = []
 
+
 class Family:
     def __init__(self):
         self.id = None
@@ -27,3 +31,17 @@ class Family:
         self.parentTwo = None
         self.wife = None
         self.children = []
+
+class Source:
+    def __init__(self):
+        self.date = None
+        self.name = None
+        self.author = None
+        self.publisher = None
+        self.repository = None
+        self.location = None
+        self.link = None
+        self.id = None
+        self.note = None
+        self.conc = None
+        self.attachedTo = []
