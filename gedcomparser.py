@@ -1,6 +1,5 @@
 from classes import Person, Family, Source
 
-
 # Creating GEDCOMParse class
 class gedcomParse:
     def __init__(self, file):
@@ -18,7 +17,8 @@ class gedcomParse:
         self.terms = ["\n", "/", "@", "DATE", "PLAC", "TITL", "_APID", "_WLNK", "SEX",
                       "HUSB", "WIFE", "CHIL", "OCCU", "EDUC", "RETI", "INDI", "NAME",
                       "GIVN", "SURN", "FAMC", "FAMS", "EVEN", "FACT", "BIRT", "DEAT",
-                      "TYPE", "DATE", "SOUR", "PUBL", "AUTH", "FAM", "REPO", "NOTE", "CONC"]
+                      "TYPE", "DATE", "SOUR", "PUBL", "AUTH", "FAM", "REPO", "NOTE",
+                      "CONC", "RESI"]
 
         person = Person()
 
@@ -94,9 +94,10 @@ class gedcomParse:
                     current_index += (
                                 len(details) - y)  # Changing next line accordingly, checking how many lines it skipped
 
-                elif line in appendingList:
+                elif line[:6] in appendingList:
                     entry = appendingList[line[:6]]
-                    getattr(person, entry).append(self.remExtra(line))
+                    if self.remExtra(line) not in getattr(person, entry):
+                        getattr(person, entry).append(self.remExtra(line))
 
             if line.startswith("0 @F"):  # Setting where families are defined
                 self.familyStart = current_index
@@ -113,6 +114,16 @@ class gedcomParse:
                 return person
 
         return None
+
+    def retrieveSourceFromPerson(self, source):
+        sources = []
+
+        for person in self.fullGedcom:
+            if source.id in person.sources:
+                sources.append(person)
+                person.sources[person.sources.index(source.id)] = source
+
+        return sources
 
     def getURLFromAPID(self, apid):
         apid = self.remExtra(apid).split(":")
@@ -142,6 +153,7 @@ class gedcomParse:
                     source.id = line.split("@")[1]
 
                 source.id = line.split("@")[1]
+                source.attachedTo = self.retrieveSourceFromPerson(source)
 
                 x = 1  # Will be used to store iteration
 
